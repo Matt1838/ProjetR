@@ -1,0 +1,79 @@
+# Packages
+
+library(shiny)
+library(sf)
+library(spData)
+library(tidyverse)
+library(ggplot2)
+library(shinydashboard)
+
+df <- world # Utilisation des données world du package 'spData'
+
+# Partie ui de l'application
+ui <- fluidPage(
+  
+  # Titre de l'application
+  dashboardPage(
+    dashboardHeader(
+      title="Carte du monde"
+    ),
+    
+    dashboardSidebar(
+      
+      # Génération des boutons radios
+      
+      radioButtons("radio", "Quelles données voulez-vous visualiser ?",
+                   c("Espérance de vie" = "esp",
+                     "PIB par habitant" = "pib")
+      )
+    ),
+    
+    dashboardBody(
+      fluidRow(
+        box(
+          # Génération de la carte du monde
+          plotOutput("distPlot"), width = 15
+        ),
+        # Quelques informations supplémentaires...
+        box(
+          title= "Quelques informations sur l'espérance de vie :",
+          p(paste0("Pays ayant l'espérance de vie la plus faible : ", df$name_long[which.min(df$lifeExp)], ' (', round(min(df$lifeExp, na.rm=TRUE),2), ' ans)')),
+          p(paste0("Pays ayant l'espérance de vie la plus élevée : ", df$name_long[which.max(df$lifeExp)], ' (', round(max(df$lifeExp, na.rm=TRUE),2), ' ans)')),
+          p(paste0("Espérance de vie médiane : ", median(round(df$lifeExp,2), na.rm=TRUE), ' ans'))
+        ),
+        box(
+          title= "Quelques informations sur le PIB par habitant :",
+          p(paste0("Pays ayant le PIB par habitant le plus faible : ", df$name_long[which.min(df$gdpPercap)], ' (', round(min(df$gdpPercap, na.rm=TRUE),2), ' USD)')),
+          p(paste0("Pays ayant le PIB par habitant le plus élevé : ", df$name_long[which.max(df$gdpPercap)], ' (', round(max(df$gdpPercap, na.rm=TRUE),2), ' USD)')),
+          p(paste0("PIB par habitant médian : ", median(round(df$gdpPercap,2), na.rm=TRUE), ' USD'))
+        )
+      )
+    )
+    
+  )
+)
+
+# Partie server de l'application
+server <- function(input, output) {
+  # Fonction permettant de générer la carte du monde
+  output$distPlot <- renderPlot({
+    
+    # Choix du bouton radio
+    map <- switch(input$radio,
+                  esp = paste('lifeExp'),
+                  pib = paste('gdpPercap'))
+    
+    # Utilisation des données "espérance de vie" ou "PIB par habitant" selon le choix de l'utilisateur
+    data <- get(map, df)
+    
+    # Génération de la carte du monde
+    ggplot() +
+      geom_sf(data = df, aes(fill = data), show.legend = TRUE)+
+      ggtitle(ifelse(map == 'lifeExp','Espérance de vie humaine dans le monde', 'PIB par habitant dans le monde'))+
+      theme(plot.title = element_text(size=22,hjust=0.5, face='bold'))+
+      scale_fill_gradient(low="#318ce7", high="#000000", na.value = "white", name=ifelse(map == 'lifeExp','Espérance de vie (en années) :', 'PIB/hab (USD) :'))
+  })
+}
+
+# Lancement de l'application
+shinyApp(ui = ui, server = server)

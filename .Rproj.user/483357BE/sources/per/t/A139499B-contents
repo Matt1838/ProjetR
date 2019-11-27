@@ -1,0 +1,605 @@
+---
+title: "TP3"
+author: "Mathieu Dode"
+date: "6 novembre 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup,include = FALSE}
+options(tinytex.verbose=TRUE)
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+# Exercice 1
+
+## Importation des données
+
+```{r}
+mpg <- load('D:/Etudes/MasterSSD/Statistiques/TP3/mpg2000.Rdata')
+mpg= as.data.frame(mpg.r)
+```
+
+## Données ville
+
+### Question 1
+
+On vérifie la normalité des données pour deux échantillons différents : les voitures qui ont des boîtes manuelles et celles qui ont des boîtes automatiques. Pour cela, on utilise un test de Shapiro avec les deux hypothèses suivantes :
+
+$H_0 :$ L'échantillon est gaussien \newline
+$H_1 :$ L'échantillon n'est pas gaussien
+
+#### Boîtes automatiques
+
+```{r}
+shapiro.test(mpg$cty[mpg$trans == 'auto'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que les données relatives au cycle de consommation des boîtes automatiques en ville ne sont pas gaussiennes.
+
+#### Boîtes manuelles
+
+```{r}
+shapiro.test(mpg$cty[mpg$trans == 'manu'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que les données relatives au cycle de consommation des boîtes manuelles en ville ne sont pas gaussiennes.
+
+### Question 2
+
+On fait de même pour la variable city_gmp = 1/cty :
+
+```{r, echo = TRUE}
+# Génération de la variable city_gmp
+mpg$city_gmp = 1/mpg$cty
+```
+
+#### Boîtes automatiques
+
+```{r}
+shapiro.test(mpg$city_gmp[mpg$trans == 'auto'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que la consommation par distance parcourue en ville pour les voitures ayant des boîtes automatiques ne sont pas gaussiennes.
+
+#### Boîtes manuelles
+
+```{r}
+shapiro.test(mpg$city_gmp[mpg$trans == 'manu'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que la consommation par distance parcourue en ville pour les voitures ayant des boîtes manuelles ne sont pas gaussiennes.
+
+### Question 3
+
+Les données n'étant pas gaussiennes, nous devons vérifier que les 2 échantillons testés soient bien assez grands pour faire les tests au tout long de l'exercice.
+
+```{r}
+paste("Longueur de l'échantillon des voitures ayant des boîtes automatiques :", length(mpg$cty[mpg$trans == 'auto']))
+paste("Longueur de l'échantillon des voitures ayant des boîtes manuelles :", length(mpg$cty[mpg$trans == 'auto']))
+```
+
+Nous pouvons donc procéder aux différents tests qui seront utilisés tout au long de cet exercice à condition qu les variances de nos échantillons soient égales.
+
+#### Test d'égalité des variances
+
+$H_0 : \sigma^2_{auto} = \sigma^2_{manu}$ \newline
+$H_1 : \sigma^2_{auto} \neq \sigma^2_{manu}$
+
+```{r}
+var.test(mpg$cty[mpg$trans == 'auto'], mpg$cty[mpg$trans == 'manu'])
+```
+
+La p-value est supérieure à 0.05, donc nous ne pouvons pas rejeter $H_0$. On affirme donc que les variances de nos deux échantillons sont égales. Nous pouvons donc faire un test de Student.
+
+#### Intervalle de confiance pour les boîtes automatiques
+
+```{r}
+t.test(mpg$cty[mpg$trans == 'auto'])
+```
+
+L'intervalle de confiance à 95% sur la consommation moyenne en ville des voitures ayant une boîte automatique est [15.36,16.57].
+
+#### Intervalle de confiance pour les boîtes manuelles
+
+```{r}
+t.test(mpg$cty[mpg$trans == 'manu'])
+```
+
+L'intervalle de confiance à 95% sur la consommation moyenne en ville des voitures ayant une boîte manuelle est [17.66,19.69].
+
+#### Question 4
+
+Nous utilisons les données city_gmp. Nous allons regarder si les boîtes automatiques consomment plus que les boîtes manuelles en ville avec un test unilatéral.
+
+$H_0 : \mu_{auto} = \mu_{manu}$\newline
+$H_1 : \mu_{auto} > \mu_{manu}$
+
+
+```{r}
+t.test(mpg$city_gmp[mpg$trans == 'auto'], mpg$city_gmp[mpg$trans == 'manu'], alternative='greater')
+```
+
+La p-value du test est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que $\mu_{auto} > \mu_{manu}$. On conclut donc que les voitures ayant une boîte automatique consomment plus en ville que les voitures ayant une boîte manuelle.
+
+## Données autoroute
+
+Etudions maintenant la différence de consommation entre les boîtes manuelles et automatiques sur autoroute.
+
+### Question 1
+
+On vérifie la normalité des données pour deux échantillons différents : les voitures qui ont des boîtes manuelles et celles qui ont des boîtes automatiques. Pour cela, on utilise un test de Shapiro avec les deux hypothèses suivantes :
+
+$H_0 :$ L'échantillon est gaussien \newline
+$H_1 :$ L'échantillon n'est pas gaussien
+
+#### Boîtes automatiques
+
+```{r}
+shapiro.test(mpg$hwy[mpg$trans == 'auto'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que les données relatives au cycle de consommation des boîtes automatiques sur autoroute ne sont pas gaussiennes.
+
+#### Boîtes manuelles
+
+```{r}
+shapiro.test(mpg$hwy[mpg$trans == 'manu'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que les données relatives au cycle de consommation des boîtes manuelles sur autoroute ne sont pas gaussiennes.
+
+### Question 2
+
+On fait de même pour la variable hwy_gmp = 1/hwy :
+
+```{r, echo = TRUE}
+# Génération de la variable hwy_gmp
+mpg$hwy_gmp = 1/mpg$hwy
+```
+
+#### Boîtes automatiques
+
+```{r}
+shapiro.test(mpg$hwy_gmp[mpg$trans == 'auto'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que la consommation par distance parcourue sur autoroute pour les voitures ayant des boîtes automatiques ne sont pas gaussiennes.
+
+#### Boîtes manuelles
+
+```{r}
+shapiro.test(mpg$hwy_gmp[mpg$trans == 'manu'])
+```
+
+La p-value est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que la consommation par distance parcourue sur autoroute pour les voitures ayant des boîtes manuelles ne sont pas gaussiennes. On sait cependant que les échantillons sont assez grands pour qu'on puisse procéder à différents tests.
+
+### Question 3
+
+#### Test d'égalité des variances
+
+$H_0 : \sigma^2_{auto} = \sigma^2_{manu}$\newline
+$H_1 : \sigma^2_{auto} \neq \sigma^2_{manu}$
+
+```{r}
+var.test(mpg$cty[mpg$trans == 'auto'], mpg$cty[mpg$trans == 'manu'])
+```
+
+La p-value est supérieure à 0.05, donc nous ne pouvons pas rejeter $H_0$. On affirme donc que les variances de nos deux échantillons sont égales. Nous pouvons donc faire un test de Student.
+
+#### Intervalle de confiance pour les boîtes automatiques
+
+```{r}
+t.test(mpg$hwy[mpg$trans == 'auto'])
+```
+
+L'intervalle de confiance à 95% sur la consommation moyenne sur autoroute des voitures ayant une boîte automatique est [21.41,23.18].
+
+#### Intervalle de confiance pour les boîtes manuelles
+
+```{r}
+t.test(mpg$hwy[mpg$trans == 'manu'])
+```
+
+L'intervalle de confiance à 95% sur la consommation moyenne sur autoroute des voitures ayant une boîte manuelle est [24.43,27.13].
+
+#### Question 4
+
+Nous utilisons les données hwy_gmp. Nous allons regarder si les boîtes automatiques consomment plus que les boîtes manuelles sur autoroute avec un test unilatéral.
+
+$H_0 : \mu_{auto} = \mu_{manu}$\newline
+$H_1 : \mu_{auto} > \mu_{manu}$
+
+```{r}
+t.test(mpg$hwy_gmp[mpg$trans == 'auto'], mpg$hwy_gmp[mpg$trans == 'manu'], alternative='greater')
+```
+
+La p-value du test est inférieure à 0.05, donc on rejette $H_0$. On affirme donc que $\mu_{auto} > \mu_{manu}$. On conclut donc que les voitures ayant une boîte automatique consomment plus sur autoroute que les voitures ayant une boîte manuelle.
+
+# Exercice 2
+
+## Question 1
+
+```{r, echo =TRUE}
+myt.test <- function(x, y,alternative = "two.sided", paired = FALSE, var.equal = FALSE, brief=FALSE){
+  # Gestion d'erreurs
+  if (is.null(x)==TRUE){
+    stop("Erreur : Le vecteur x ne peut pas être NULL")
+  }
+  if (is.null(y)==TRUE){
+    stop("Erreur : Le vecteur y ne peut pas être NULL")
+  }
+  if (is.numeric(x)==FALSE){
+    stop("Erreur : Le vecteur x doit être numérique")
+  }
+  if (is.numeric(y)==FALSE){
+    stop("Erreur : Le vecteur x doit être numérique")
+  }
+  # Cas d'échantillons appariés
+  if (paired == TRUE) {
+    if (length(x)!=length(y)){
+      stop("Erreur : Les vecteurs x et y doivent être de même longueur")
+    }
+    n <- length(x)
+    statistic <- (mean(x)-mean(y))/(sqrt(var(x-y)/n))
+    df = n-1
+    method <- 'Student two sample t-test'
+  }
+  # Cas d'échantillons non appariés
+  if (paired ==FALSE) {
+    n1 <- length(x)
+    n2 <- length(y)
+    # Cas d'égalité des variances
+    if (var.equal == TRUE){
+      statistic <- (mean(x)-mean(y))/(sqrt(((n1-1)*var(x)+(n2-1)*var(y))/(n1+n2-2))*sqrt(1/n1+1/n2))
+      df <- n1+n2-2
+      method <- 'Student two sample t-test'
+    }
+    # Cas de non égalité des variances
+    if (var.equal == FALSE) {
+      statistic <- (mean(x)-mean(y))/sqrt(var(x)/n1+var(y)/n2)
+      df <- (var(x)/n1+var(y)/n2)^2/((var(x)/n1)^2/(n1-1)+(var(y)/n2)^2/(n2-1))
+      method <- 'Welch two sample t-test'
+    }
+  }
+  # Calcul de la p-value : Cas bivarié
+  if (alternative == "two.sided"){
+    if (statistic < 0){
+      p.value <- 2*pt(statistic, df)
+    }
+    else{
+      p.value <- 2*pt(statistic, df, lower.tail = FALSE)
+    }
+  }
+  # Cas univariés
+  if (alternative == "less"){
+    p.value <- pt(statistic, df)
+  }
+  if (alternative == "greater"){
+    p.value <- pt(statistic, df, lower.tail = FALSE)
+  }
+  return(list(method, alternative, p.value, df,statistic))
+}
+```
+
+On test ensuite notre fonction en générant 2 échantillons non appariés à variance égales. On fait le test suivant en générant un échantillon X et un échantillon Y :
+
+$H_0 : \mu_{X} = \mu_{Y}$\newline
+$H_1 : \mu_{X} \neq \mu_{Y}$
+
+Génération de X :
+
+```{r}
+(X <- c(0.5548773, 1.1915892, -0.4580385, -0.1115346, 0.8131957, 1.5057274,
+0.2969755, 0.3173708, 1.9979060, -0.3039169, 0.1211066))
+
+```
+
+Génération de Y :
+
+```{r}
+(Y <- c(0.6483476, 1.8113529, 2.0418074, 0.9330143, 1.2162020, 0.4360250,
+0.8259032, 0.8762932, -0.3322635))
+```
+
+On teste ensuite la fonction :
+
+```{r}
+# Test de la fonction
+myt.test(X, Y,alternative = "two.sided", paired = FALSE, var.equal = TRUE, brief=FALSE)
+```
+
+Puis on compare avec la fonction "t.test" de R :
+
+```{r}
+t.test(X, Y,alternative = "two.sided", paired = FALSE, var.equal = TRUE)
+```
+
+Dans les 2 cas, nous obtenons un degrès de liberté de 18, une statistique de test de -1.197 et une p-value de 0.2468. Nous conservons donc $H_0$ et affirmons que les moyennes des échantillons X et Y sont égales.
+
+La fonction que l'on a généré fonctionne !
+
+# Exercice 3
+
+## Question 1
+
+```{r, echo = TRUE}
+# Importation des données :
+diamant<- read.table('D:/Etudes/MasterSSD/Statistiques/TP3/diamonds.dat', T)
+```
+
+```{r, echo = TRUE}
+# Extraction des données prix et clarté en un seul data frame :
+df <- diamant[,c(3,5)]
+```
+
+## Question 2
+
+```{r, fig.cap = "Prix des diamants selon leur clarté"}
+levels(df$Clarity) = c("IF", "VVS1","VVS2","VS1","VS2")
+plot(df$Clarity, df$Price, main = 'Prix des diamants selon leur clarté', xlab = 'Clarté du diamant', ylab = 'Prix des diamants (S$)')
+```
+
+```{r}
+summary(df$Price[df$Clarity == 'IF'])
+paste('écart type : ', sd(df$Price[df$Clarity == 'IF']))
+```
+
+```{r}
+summary(df$Price[df$Clarity == 'VVS1'])
+paste('écart type : ', sd(df$Price[df$Clarity == 'VVS1']))
+```
+
+```{r}
+summary(df$Price[df$Clarity == 'VVS2'])
+paste('écart type : ', sd(df$Price[df$Clarity == 'VVS2']))
+```
+
+```{r}
+summary(df$Price[df$Clarity == 'VS1'])
+paste('écart type : ', sd(df$Price[df$Clarity == 'VS1']))
+```
+
+```{r}
+summary(df$Price[df$Clarity == 'VS2'])
+paste('écart type : ', sd(df$Price[df$Clarity == 'VS2']))
+```
+
+## Question 3
+
+D'après les résultats trouvés dans la question 2, il semblerait que le diamant le plus clair "IF" coûte en général moins cher que les autres. Les autres diamants ne semblent pas avoir énormément de différence dans leur prix. Nous remarquons que le VVS2 a le prix médian le plus cher, mais que son prix maximal n'atteint pas les 10 000S$, contrairement à tous les autres. Le diamant pouvant coûter le plus cher est le VS1, et le moins cher le VVS2.
+
+## Question 4
+
+Nous devons faire un test de Fisher. Pour cela, nous procédons à une ANOVA. Nous devons déjà vérifier la normalité des échantillons. Pour cela, nous procédons à des tests de Shapiro.
+
+$H_0 :$ L'échantillon est gaussien\newline
+$H_1 :$ L'échantillon n'est pas gaussien
+
+```{r}
+shapiro.test(df$Price[df$Clarity == 'IF'])
+```
+
+```{r}
+shapiro.test(df$Price[df$Clarity == 'VVS1'])
+```
+
+```{r}
+shapiro.test(df$Price[df$Clarity == 'VVS2'])
+```
+
+```{r}
+shapiro.test(df$Price[df$Clarity == 'VS1'])
+```
+
+```{r}
+shapiro.test(df$Price[df$Clarity == 'VS2'])
+```
+
+Nous rejetons $H_0$ pour chaque test car les p-values sont toutes inférieures à 0.05. Les échantillons ne sont pas gaussiens. Vérifions donc que n>30 pour chaque échantillon :
+
+```{r}
+paste("Taille de l'échantillon pour clarté = IF : ", length(df$Price[df$Clarity == 'IF']))
+```
+
+```{r}
+paste("Taille de l'échantillon pour clarté = VVS1 : ",length(df$Price[df$Clarity == 'VVS1']))
+```
+
+```{r}
+paste("Taille de l'échantillon pour clarté = VVS2 : ",length(df$Price[df$Clarity == 'VVS2']))
+```
+
+```{r}
+paste("Taille de l'échantillon pour clarté = VS1 : ",length(df$Price[df$Clarity == 'VS1']))
+```
+
+```{r}
+paste("Taille de l'échantillon pour clarté = VS2 : ",length(df$Price[df$Clarity == 'VS2']))
+```
+
+La taille n de chaque échantillon est supérieure à 30. Nous pouvons donc vérifier la deuxième hypothèse, c'est-à-dire l'hypothèse d'homoscédasticité : Pour cela, faisons un test de Bartlett :
+
+$H_0 : \sigma_{IF}=\sigma_{VVS1}=\sigma_{VVS2}= \sigma_{VS1}=\sigma_{VS2}$\newline
+$H_1 : \exists \sigma_i \neq \sigma_j$ ( $i \neq j$)
+
+```{r}
+bartlett.test(Price~Clarity,df)
+```
+
+La p-value est de 0.6407, nous ne pouvons donc pas rejeter $H_0$. On affirme donc que les variances de nos échantillons sont bien égales. Nous pouvons donc procéder à une ANOVA.
+
+Les hypothèses sont les suivantes :
+
+$H_0 : \mu_{IF}=\mu_{VVS1}=\mu_{VVS2}= \mu_{VS1}=\mu_{VS2}$\newline
+$H_1 : \exists \mu_i \neq \mu_j$ ( $i \neq j$)
+
+```{r}
+anova <- aov(Price~Clarity,df)
+summary(anova)
+```
+
+La p-valeur du test est de 2.22e-05. Nous rejetons donc $H_0$ que ce soit au seuil 5% ou au seuil 0.01%. On affirme donc que les moyennes des différents échantillons ne sont pas toutes égales.
+
+## Question 5
+
+### Comparaison des différents groupes - Méthode de Fisher
+
+Nous allons faire les tests de Student pour comparer deux à deux les moyennes des différents groupes.
+Nous utiliserons toujours ce test :
+
+$H_0 : \mu_i = \mu_j$ \newline
+$H_1 : \mu_i \neq \mu_j$\newline
+( $i \neq j$)
+
+Nous rejeterons $H_0$ si la p-value du test est inférieure à 0.05.
+
+#### Comparaison des prix de "IF" et de "VS1"
+
+```{r}
+t.test(df$Price[df$Clarity == 'IF'], df$Price[df$Clarity == 'VS1'])
+```
+
+La p-value est de 5.904e-05. Nous rejetons donc $H_0$. On affirme que les moyennes des sous échantillons IF et VS1 ne sont donc pas égales.
+
+#### Comparaison des prix de "IF" et de "VS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'IF'], df$Price[df$Clarity == 'VS2'])
+```
+
+La p-value est de 1.789e-05. Nous rejetons donc $H_0$. On affirme que les moyennes des sous échantillons IF et VS2 ne sont donc pas égales.
+
+#### Comparaison des prix de "IF" et de "VVS1"
+
+```{r}
+t.test(df$Price[df$Clarity == 'IF'], df$Price[df$Clarity == 'VVS1'])
+```
+
+La p-value est de 9.904e-05. Nous rejetons donc $H_0$. On affirme que les moyennes des sous échantillons IF et VVS1 ne sont donc pas égales.
+
+#### Comparaison des prix de "IF" et de "VVS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'IF'], df$Price[df$Clarity == 'VVS2'])
+```
+
+La p-value est de 1.685e-06. Nous rejetons donc $H_0$. On affirme que les moyennes des sous échantillons IF et VVS2 ne sont donc pas égales.
+
+#### Comparaison des prix de "VS1" et de "VS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VS1'], df$Price[df$Clarity == 'VS2'])
+```
+
+La p-value est de 0.7393. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VS1 et VS2 sont égales.
+
+#### Comparaison des prix de "VS1" et de "VVS1"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VS1'], df$Price[df$Clarity == 'VVS1'])
+```
+
+La p-value est de 0.4157. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VS1 et VVS1 sont égales.
+
+#### Comparaison des prix de "VS1" et de "VVS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VS1'], df$Price[df$Clarity == 'VVS2'])
+```
+
+La p-value est de 0.6605. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VS1 et VVS2 sont égales.
+
+#### Comparaison des prix de "VS2" et de "VVS1"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VS2'], df$Price[df$Clarity == 'VVS1'])
+```
+
+La p-value est de 0.5663. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VS2 et VVS1 sont égales.
+
+#### Comparaison des prix de "VS2" et de "VVS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VS2'], df$Price[df$Clarity == 'VVS2'])
+```
+
+La p-value est de 0.3742. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VS2 et VVS2 sont égales.
+
+#### Comparaison des prix de "VVS1" et de "VVS2"
+
+```{r}
+t.test(df$Price[df$Clarity == 'VVS1'], df$Price[df$Clarity == 'VVS2'])
+```
+
+La p-value est de 0.1504. Nous ne pouvons donc pas rejeter $H_0$. On affirme que les moyennes des sous échantillons VVS1 et VVS2 sont égales.
+
+Nous remarquons que les moyennes de tous les échantillons sont égales, sauf pour l'échantillon "IF" pour lequel sa moyenne n'est égale à celle d'aucun autre échantillon.
+
+Maintenant, nous allons combiner les p-valeurs obtenues à l'aide de la méthode de Fisher. Pour cela, on utilise le package "BisRNA".
+
+```{r, echo = TRUE}
+library(BisRNA)
+```
+
+```{r}
+paste("p-valeur : ", fisher.method(c(5.904e-05,1.789e-05,9.904e-05,1.685e-06,0.7393,0.4157,0.6605,0.5663,0.3742,0.1504)))
+```
+
+Si nous combinons les p-value observées, nous obvervons une p-value très faible. Nous rejetons aussi $H_0$. Cela confirme encore une fois le fait que les moyennes de nos 5 échantillons ne sont pas égales...
+
+### Comparaison des différents groupes - Méthode HSD de Tukey
+
+```{r}
+TukeyHSD(anova)
+```
+
+Nous pouvons voir dans la partie "diff" que les plus grandes différences de prix entre les échantillons se trouvent avec les diamants de clarté "IF". De plus, les p-valeurs rejettent également $H_0$ dès que l'on compare le prix des diamants de clarté "IF" avec le prix des diamants d'une autre clarté, et l'acceptent lorsque l'on compare les prix des diamants des autres clartés entre elles.
+
+La méthode de Fisher et la méthode de Tukey donnent donc les mêmes résultats.
+
+### Comparaison des différents groupes - Méthode de Bonferroni
+
+```{r}
+pairwise.t.test(df$Price, df$Clarity, p.adj = "bonf")
+```
+
+Les p-valeurs rejettent également $H_0$ dès que l'on compare le prix des diamants de clarté "IF" avec le prix des diamants d'une autre clarté, et l'acceptent lorsque l'on compare les prix des diamants des autres clarté que "IF" entre elles.
+
+La méthode de Fisher, de Tukey et de Bonferroni donnent donc les mêmes résultats.
+
+### Méthode la plus grossière
+
+La méthode de Bonferroni semblent être la plus grossière. En effet, nous trouvons des p-values égales à 1 avec cette méthode, ce qui semble moins précis que les deux autres méthodes.
+
+## Question 6
+
+Les résultats que nous avons trouvés sont tous logiques !
+En effet, dans la question 3, nous avons remarqué qu'il semblait que les diamants de clarté "IF" étaient moins chers que les autres, qui semblaient eux plus ou moins du même prix. Notre test de Fisher nous a en effet démontré qu'il existait un $\mu_i \neq \mu_j$ ($i \neq j$).
+De plus, les tests de la question 5 nous ont confirmé que c'était bien le diamant de clarté "IF" qui avaient un prix différents des autres, qui eux n'avaient pas de différence significative dans leur prix.
+
+## Question 7
+
+En regardant les résultats de la question 2, nous remarquons que les données ne semblent pas gaussiennes, mais semblent cependant avoir des variances égales.
+
+Grâce au test de Bartlett effectué dans la question 4, nous avons affirmé que les variances étaient égales avec une p-value élevée (0.6407). Cela a donc confirmé notre hypothèse.
+
+## Question 8
+
+Nous avons trouvé que les prix moyens des diamants de toutes les clartés étaient égaux, sauf les diamants de clarté "IF". Nous allons donc comparer le prix moyen des diamants de clarté "IF" avec le prix moyen des diamants d'une autre clarté (prenons par exemple "VVS1"). Nous allons cette fois si faire un test unilatéral avec comme option alternative "less" pour vérifier que le prix moyen des diamants "IF" est bien inférieur à celui des diamants "VVS1".
+
+Nous allons donc refaire un t.test, mais en utilisant cette fois-ci les hypothèses suivantes :
+
+$H_0 : \mu_{IF}= \mu_{VVS1}$ \newline
+$H_1 : \mu_{IF} < \mu_{VVS1}$ \newline
+
+```{r}
+t.test(df$Price[df$Clarity == 'IF'],df$Price[df$Clarity == 'VVS1'],alternative="less")
+```
+
+La p-value est de 4.952e-05, nous rejetons donc $H_0$. On affirme donc que le prix des diamants de clarté "IF" est inférieur au prix des diamants de clarté "VVS1"
+
+Nous pouvons donc conclure ceci : $\mu_{IF}<\mu_{VVS1}=\mu_{VVS2}= \mu_{VS1}=\mu_{VS2}$. Nous affirmons donc que le prix moyen des diamants de clarté IF est inférieur au prix moyen des autres diamants, qui eux n'ont pas de différence significative dans leur prix moyen. L'affirmation de l'énoncé est donc fausse.
+
+Nous pouvons expliquer notre conclusion par le fait que les diamants ont un prix médian assez similaire, sauf pour les diamants de clarté "IF" qui ont un prix médian beaucoup moins élevé.
